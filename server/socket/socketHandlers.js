@@ -7,7 +7,7 @@ const noteRooms = new Map();
 const previewingUsers = new Map(); // noteId -> Set of {userId, username}
 
 const socketAuth = async (socket, next) => {
-  try {
+  try {  
     const token = socket.handshake.auth.token;
     
     if (!token) {
@@ -26,7 +26,7 @@ const socketAuth = async (socket, next) => {
   } catch (error) {
     next(new Error('Authentication error'));
   }
-};
+};   
 
 const handleConnection = (io) => {
   return async (socket) => {
