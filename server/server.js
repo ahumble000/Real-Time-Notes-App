@@ -16,8 +16,7 @@ const server = http.createServer(app);
 
 // Configure CORS
 const corsOptions = {
-  origin: 'https://notify-alpha-nine.vercel.app',
-  credentials: true,
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
