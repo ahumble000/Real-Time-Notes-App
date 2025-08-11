@@ -29,7 +29,7 @@ export const Button = ({
   icon,
   iconPosition = 'left',
   fullWidth = false,
-  rounded = 'xl'
+  rounded = 'xl'   
 }: ButtonProps) => {
   const baseClasses = `
     group relative inline-flex items-center justify-center font-semibold

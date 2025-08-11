@@ -4,6 +4,7 @@ const Note = require('../models/Note');
 
 const activeConnections = new Map();
 const noteRooms = new Map();
+const previewingUsers = new Map(); // noteId -> Set of {userId, username}
 
 const socketAuth = async (socket, next) => {
   try {
@@ -113,7 +114,8 @@ const handleConnection = (io) => {
         }
 
         const hasEditAccess = note.author.toString() === socket.user._id.toString() ||
-                             note.collaborators.includes(socket.user._id);
+                             note.collaborators.includes(socket.user._id) ||
+                             note.isPublic;
 
         if (!hasEditAccess) {
           socket.emit('error', { message: 'No edit permission' });
@@ -160,11 +162,42 @@ const handleConnection = (io) => {
       });
     });
 
+    socket.on('preview-mode-change', (data) => {
+      const { noteId, userId, username, isPreview } = data;
+      
+      if (!previewingUsers.has(noteId)) {
+        previewingUsers.set(noteId, new Set());
+      }
+      
+      const previewSet = previewingUsers.get(noteId);
+      const userKey = `${userId}:${username}`;
+      
+      if (isPreview) {
+        previewSet.add(userKey);
+      } else {
+        previewSet.delete(userKey);
+      }
+      
+      // Convert Set to array of user objects
+      const previewingUsersList = Array.from(previewSet).map(userKey => {
+        const [id, name] = userKey.split(':');
+        return { id, username: name };
+      });
+      
+      // Broadcast to all users in the note room
+      io.to(noteId).emit('preview-mode-updated', {
+        previewingUsers: previewingUsersList
+      });
+      
+      console.log(`Preview mode changed for note ${noteId}: ${username} ${isPreview ? 'started' : 'stopped'} previewing`);
+    });
+
     socket.on('disconnect', () => {
       console.log(`User ${socket.user.username} disconnected`);
       
       activeConnections.delete(socket.id);
       
+      // Clean up from note rooms
       noteRooms.forEach((users, noteId) => {
         if (users.has(socket.user._id.toString())) {
           users.delete(socket.user._id.toString());
@@ -178,6 +211,29 @@ const handleConnection = (io) => {
             }).filter(Boolean);
 
             socket.to(noteId).emit('users-in-note', connectedUsers);
+          }
+        }
+      });
+      
+      // Clean up from preview mode tracking
+      previewingUsers.forEach((previewSet, noteId) => {
+        const userKey = `${socket.user._id}:${socket.user.username}`;
+        if (previewSet.has(userKey)) {
+          previewSet.delete(userKey);
+          
+          // Notify remaining users about the update
+          const previewingUsersList = Array.from(previewSet).map(userKey => {
+            const [id, name] = userKey.split(':');
+            return { id, username: name };
+          });
+          
+          socket.to(noteId).emit('preview-mode-updated', {
+            previewingUsers: previewingUsersList
+          });
+          
+          // Clean up empty preview sets
+          if (previewSet.size === 0) {
+            previewingUsers.delete(noteId);
           }
         }
       });

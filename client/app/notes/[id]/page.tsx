@@ -37,6 +37,7 @@ export default function NoteEditorPage() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
+  const [previewingUsers, setPreviewingUsers] = useState<ConnectedUser[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -85,6 +86,9 @@ export default function NoteEditorPage() {
     socketService.onUsersInNote(handleUsersInNote);
     socketService.onUserTyping(handleUserTyping);
     socketService.onError(handleSocketError);
+    
+    // Listen for preview mode changes
+    socketService.getSocket()?.on('preview-mode-updated', handlePreviewModeUpdate);
 
     return () => {
       // Clean up socket listeners
@@ -92,6 +96,7 @@ export default function NoteEditorPage() {
       socketService.offUsersInNote();
       socketService.offUserTyping();
       socketService.offError();
+      socketService.getSocket()?.off('preview-mode-updated');
       socketService.leaveNote(noteId);
     };
   }, [note, noteId]);
@@ -133,6 +138,20 @@ export default function NoteEditorPage() {
     };
   }, [content, canEdit, noteId]);
 
+  // Cleanup on unmount - notify that user is no longer previewing
+  useEffect(() => {
+    return () => {
+      if (socketService.isConnected() && user?.id) {
+        socketService.getSocket()?.emit('preview-mode-change', {
+          noteId,
+          userId: user.id,
+          username: user.username,
+          isPreview: false
+        });
+      }
+    };
+  }, [noteId, user]);
+
   const loadNote = async () => {
     try {
       setLoading(true);
@@ -143,9 +162,10 @@ export default function NoteEditorPage() {
       setContent(noteData.content);
       lastSavedContentRef.current = noteData.content;
       
-      // Check if user can edit this note
+      // Check if user can edit this note (author, collaborator, or public note)
       const userCanEdit = user?.id === noteData.author._id || 
-                         noteData.collaborators.some((collab: any) => collab._id === user?.id);
+                         noteData.collaborators.some((collab: any) => collab._id === user?.id) ||
+                         noteData.isPublic;
       setCanEdit(userCanEdit);
       
     } catch (error: any) {
@@ -229,6 +249,30 @@ export default function NoteEditorPage() {
     toast.error(error.message || 'Socket connection error');
   }, []);
 
+  const handlePreviewModeChange = (isPreview: boolean) => {
+    setIsPreviewMode(isPreview);
+    
+    // Notify other users about preview mode change
+    if (socketService.isConnected()) {
+      socketService.getSocket()?.emit('preview-mode-change', {
+        noteId,
+        userId: user?.id,
+        username: user?.username,
+        isPreview
+      });
+    }
+  };
+
+  const handlePreviewModeUpdate = useCallback((data: any) => {
+    setPreviewingUsers(prev => {
+      const filtered = prev.filter(u => u.id !== data.userId);
+      if (data.isPreview) {
+        return [...filtered, { id: data.userId, username: data.username }];
+      }
+      return filtered;
+    });
+  }, []);
+
   const handleUpdateNote = async (data: UpdateNoteData) => {
     if (!canEdit) return;
 
@@ -291,11 +335,18 @@ export default function NoteEditorPage() {
                 <h1 className="text-xl font-semibold text-gray-900 truncate max-w-md">
                   {note.title}
                 </h1>
-                {note.isPublic ? (
-                  <Globe className="h-5 w-5 text-green-500" />
-                ) : (
-                  <Lock className="h-5 w-5 text-gray-500" />
-                )}
+                <div className="flex items-center space-x-1">
+                  {note.isPublic ? (
+                    <div className="flex items-center space-x-1">
+                      <Globe className="h-5 w-5 text-green-500" />
+                      <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full">
+                        Public - Anyone can edit
+                      </span>
+                    </div>
+                  ) : (
+                    <Lock className="h-5 w-5 text-gray-500" />
+                  )}
+                </div>
               </div>
             </div>
 
@@ -329,7 +380,7 @@ export default function NoteEditorPage() {
               {/* Mode Toggle */}
               <div className="flex items-center bg-gray-100 rounded-lg p-1">
                 <button
-                  onClick={() => setIsPreviewMode(false)}
+                  onClick={() => handlePreviewModeChange(false)}
                   className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                     !isPreviewMode
                       ? 'bg-white text-gray-900 shadow-sm'
@@ -340,7 +391,7 @@ export default function NoteEditorPage() {
                   Edit
                 </button>
                 <button
-                  onClick={() => setIsPreviewMode(true)}
+                  onClick={() => handlePreviewModeChange(true)}
                   className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                     isPreviewMode
                       ? 'bg-white text-gray-900 shadow-sm'
@@ -465,16 +516,58 @@ export default function NoteEditorPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="min-h-[600px]">
           {isPreviewMode ? (
-            <div className="p-6">
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]}
-                className="markdown-preview"
-              >
-                {content || '*No content yet. Switch to edit mode to start writing.*'}
-              </ReactMarkdown>
+            <div className="relative">
+              {/* Preview Users Header */}
+              {previewingUsers.length > 0 && (
+                <div className="flex items-center justify-between p-4 border-b border-gray-200/50 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
+                  <div className="flex items-center space-x-3">
+                    <Eye className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {previewingUsers.length} user{previewingUsers.length !== 1 ? 's' : ''} viewing in preview mode
+                    </span>
+                  </div>
+                  <div className="flex -space-x-2">
+                    {previewingUsers.slice(0, 4).map((previewUser, index) => (
+                      <div
+                        key={previewUser.id}
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-blue-500 text-white text-xs font-medium border-2 border-white shadow-sm"
+                        title={`${previewUser.username} is previewing`}
+                      >
+                        {previewUser.username.charAt(0).toUpperCase()}
+                      </div>
+                    ))}
+                    {previewingUsers.length > 4 && (
+                      <div className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-gray-500 text-white text-xs font-medium border-2 border-white shadow-sm">
+                        +{previewingUsers.length - 4}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              <div className="p-6">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  className="markdown-preview"
+                >
+                  {content || '*No content yet. Switch to edit mode to start writing.*'}
+                </ReactMarkdown>
+              </div>
             </div>
           ) : (
             <div className="relative h-full">
+              {/* Public Note Editor Warning */}
+              {note.isPublic && user?.id !== note.author._id && (
+                <div className="absolute top-4 left-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-3 z-10">
+                  <div className="flex items-center space-x-2">
+                    <Globe className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-800">
+                      <strong>Public Note:</strong> You can edit this note. Changes will be visible to everyone.
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               <textarea
                 ref={textareaRef}
                 value={content}
@@ -482,7 +575,10 @@ export default function NoteEditorPage() {
                 placeholder={canEdit ? "Start writing your note..." : "You don't have permission to edit this note."}
                 disabled={!canEdit}
                 className="editor-textarea"
-                style={{ minHeight: '600px' }}
+                style={{ 
+                  minHeight: '600px',
+                  paddingTop: note.isPublic && user?.id !== note.author._id ? '80px' : '20px'
+                }}
               />
               
               {/* Typing Indicators */}
