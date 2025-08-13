@@ -261,7 +261,6 @@ export default function NotesPage() {
                   onClick={() => handleViewNote(note._id)}
                   onDelete={() => handleDeleteNote(note._id)}
                   onEdit={() => handleEditNote(note._id)}
-                  onPreview={() => handlePreviewNote(note._id)}
                   showAuthor={activeTab !== 'my'}
                   currentUserId={user?.id}
                 />

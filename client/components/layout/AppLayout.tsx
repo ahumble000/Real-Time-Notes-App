@@ -12,10 +12,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <AppSidebar 
-        collapsed={sidebarCollapsed} 
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
-      />
+      <AppSidebar />
       
       <main className={`
         flex-1 transition-all duration-300 ease-in-out
