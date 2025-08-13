@@ -59,13 +59,14 @@ export const Modal = ({
       {/* Modal */}
       <div className={`
         relative w-full ${maxWidthStyles[maxWidth]} 
+        max-h-[90vh] overflow-hidden
         bg-white border-4 border-black rounded-2xl 
         shadow-[8px_8px_0px_0px_#000] transform rotate-1
         animate-in zoom-in-95 duration-200
       `}>
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between p-6 border-b-4 border-black bg-gradient-to-r from-yellow-400 to-pink-400">
+          <div className="flex items-center justify-between p-6 border-b-4 border-black bg-gradient-to-r from-yellow-400 to-pink-400 flex-shrink-0">
             <h2 className="text-2xl font-black text-black tracking-tight">
               {title}
             </h2>
@@ -79,7 +80,7 @@ export const Modal = ({
         )}
         
         {/* Content */}
-        <div className="p-6 relative">
+        <div className="p-6 relative overflow-y-auto flex-1">
           {children}
           
           {/* Decorative elements */}

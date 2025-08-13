@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, User, Eye, Lock, MoreVertical, Trash2, Edit3, Users, FileText } from 'lucide-react';
+import { Clock, User, Eye, Lock, MoreVertical, Trash2, Users, FileText } from 'lucide-react';
 import { Note } from '@/types';
 
 interface NoteCardProps {
   note: Note;
   onClick?: () => void;
   onDelete?: () => void;
-  onEdit?: () => void;
   showAuthor?: boolean;
   currentUserId?: string;
 }
@@ -17,7 +16,6 @@ export const NoteCard = ({
   note,
   onClick,
   onDelete,
-  onEdit,
   showAuthor = false,
   currentUserId
 }: NoteCardProps) => {
@@ -130,52 +128,26 @@ export const NoteCard = ({
               className="p-2 border-2 border-black rounded-lg bg-white hover:bg-gray-100 shadow-[2px_2px_0px_0px_#000] hover:shadow-[3px_3px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all duration-200"
             >
               <MoreVertical className="w-4 h-4 text-black" />
-            </button>
-
-            {/* Dropdown Menu */}
-            {showMenu && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-white border-3 border-black rounded-xl shadow-[4px_4px_0px_0px_#000] z-20">
-                <div className="py-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onClick?.();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-2 text-left font-bold text-black hover:bg-green-200 flex items-center gap-2 transition-colors border-b-2 border-black"
-                  >
-                    <Eye className="w-4 h-4" />
-                    View Note
-                  </button>
-                  {onEdit && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit();
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left font-bold text-black hover:bg-blue-200 flex items-center gap-2 transition-colors border-b-2 border-black"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      Edit Note
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete();
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left font-bold text-red-700 hover:bg-red-200 flex items-center gap-2 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Delete Note
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+            </button>             {/* Dropdown Menu */}
+             {showMenu && (
+               <div className="absolute right-0 top-full mt-2 w-48 bg-white border-3 border-black rounded-xl shadow-[4px_4px_0px_0px_#000] z-20">
+                 <div className="py-2">
+                   {canDelete && (
+                     <button
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         onDelete();
+                         setShowMenu(false);
+                       }}
+                       className="w-full px-4 py-3 text-left font-bold text-red-700 hover:bg-red-200 flex items-center gap-3 transition-colors"
+                     >
+                       <Trash2 className="w-5 h-5" />
+                       Delete Note
+                     </button>
+                   )}
+                 </div>
+               </div>
+             )}
           </div>
         </div>
 

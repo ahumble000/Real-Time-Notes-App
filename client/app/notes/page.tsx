@@ -253,14 +253,12 @@ export default function NotesPage() {
                 ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' 
                 : 'space-y-4'
               }
-            `}>
-              {filteredNotes.map((note) => (
+            `}>               {filteredNotes.map((note) => (
                 <NoteCard
                   key={note._id}
                   note={note}
                   onClick={() => handleViewNote(note._id)}
                   onDelete={() => handleDeleteNote(note._id)}
-                  onEdit={() => handleEditNote(note._id)}
                   showAuthor={activeTab !== 'my'}
                   currentUserId={user?.id}
                 />

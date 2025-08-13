@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useParams, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { 
   ArrowLeft, 
   Save, 
@@ -19,7 +18,8 @@ import {
   Loader2,
   User,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -303,12 +303,33 @@ export default function NoteEditorPage() {
     router.push('/auth/login');
   };
 
+  const handleDeleteNote = async () => {
+    if (!note) return;
+    
+    // Check if user can delete this note (must be the author)
+    const canDelete = user?.id === note.author._id;
+    if (!canDelete) {
+      toast.error('You can only delete your own notes');
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to delete this note? This action cannot be undone.')) {
+      try {
+        await api.delete(`/notes/${noteId}`);
+        toast.success('Note deleted successfully!');
+        router.push('/notes');
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || 'Failed to delete note');
+      }
+    }
+  };
+
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Loading note...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-yellow-50 to-pink-50">
+        <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_#000] transform rotate-1">
+          <div className="animate-spin w-12 h-12 border-4 border-black border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-xl font-black text-black">Loading note...</p>
         </div>
       </div>
     );
@@ -316,10 +337,10 @@ export default function NoteEditorPage() {
 
   if (!note) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Note not found</p>
-          <Button onClick={() => router.push('/notes')} className="mt-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-yellow-50 to-pink-50">
+        <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_#000] text-center">
+          <p className="text-xl font-black text-black mb-4">Note not found</p>
+          <Button onClick={() => router.push('/notes')} variant="brutal" className="bg-blue-400 hover:bg-blue-300">
             Back to Notes
           </Button>
         </div>
@@ -328,8 +349,7 @@ export default function NoteEditorPage() {
   }
 
   return (
-    <AppLayout>
-      <div className="min-h-screen bg-yellow-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-yellow-50 to-pink-50">
       {/* Brutal Header */}
       <header className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_#000]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -443,6 +463,17 @@ export default function NoteEditorPage() {
                     <span>SETTINGS</span>
                   </Button>
                 </>
+              )}
+
+              {/* Delete Button - Only show for note authors */}
+              {user?.id === note.author._id && (
+                <Button
+                  onClick={handleDeleteNote}
+                  className="bg-red-400 border-3 border-black shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 font-black text-white flex items-center space-x-2 px-4 py-2 transform -rotate-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>DELETE NOTE</span>
+                </Button>
               )}
 
               {/* User Menu - Brutal Style */}
@@ -641,8 +672,7 @@ export default function NoteEditorPage() {
           onSubmit={handleUpdateNote}
         />
       )}
-      </div>
-    </AppLayout>
+    </div>
   );
 }
 
