@@ -21,9 +21,21 @@ module.exports = {
           900: '#1e3a8a',
         },
       },
+      borderWidth: {
+        '3': '3px',
+        '5': '5px',
+        '6': '6px',
+      },
+      boxShadow: {
+        'brutal': '8px 8px 0px 0px #000',
+        'brutal-sm': '4px 4px 0px 0px #000',
+        'brutal-lg': '12px 12px 0px 0px #000',
+        'brutal-color': '8px 8px 0px 0px var(--shadow-color)',
+      },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
+        'bounce-subtle': 'bounceSubtle 2s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -33,6 +45,10 @@ module.exports = {
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        bounceSubtle: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
         },
       },
     },

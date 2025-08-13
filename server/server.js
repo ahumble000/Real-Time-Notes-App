@@ -9,6 +9,10 @@ const cookieParser = require('cookie-parser');
 // Import routes and socket handlers
 const authRoutes = require('./routes/auth');
 const notesRoutes = require('./routes/notes');
+const workspacesRoutes = require('./routes/workspaces');
+const templatesRoutes = require('./routes/templates');
+const analyticsRoutes = require('./routes/analytics');
+const usersRoutes = require('./routes/users');
 const { socketAuth, handleConnection } = require('./socket/socketHandlers');
 
 const app = express();
@@ -16,11 +20,15 @@ const server = http.createServer(app);
 
 // Configure CORS
 const corsOptions = {
-  origin: 'https://notify-alpha-nine.vercel.app',
+  origin: [
+    'https://notify-alpha-nine.vercel.app',
+    'http://localhost:3000'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
+
 
 app.use(cors(corsOptions));
 
@@ -45,6 +53,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/workspaces', workspacesRoutes);
+app.use('/api/templates', templatesRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/users', usersRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

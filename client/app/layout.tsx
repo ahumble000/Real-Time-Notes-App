@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google'
 import '../styles/globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { Toaster } from 'react-hot-toast'
+import { LayoutWrapper } from '@/components/layout/LayoutWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,14 +20,20 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          {children}
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
           <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
               style: {
-                background: '#363636',
+                background: '#1f2937',
                 color: '#fff',
+                border: '3px solid #000',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                boxShadow: '4px 4px 0px #000',
               },
             }}
           />

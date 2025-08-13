@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 interface ButtonProps {
   children: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline' | 'glass' | 'gradient';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline' | 'brutal';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   disabled?: boolean;
   loading?: boolean;
@@ -14,7 +14,6 @@ interface ButtonProps {
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
   fullWidth?: boolean;
-  rounded?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
 export const Button = ({
@@ -28,91 +27,70 @@ export const Button = ({
   className = '',
   icon,
   iconPosition = 'left',
-  fullWidth = false,
-  rounded = 'xl'   
+  fullWidth = false
 }: ButtonProps) => {
   const baseClasses = `
-    group relative inline-flex items-center justify-center font-semibold
-    transition-all duration-300 ease-out focus:outline-none
-    disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-    transform-gpu hover:scale-[1.02] active:scale-[0.98]
-    focus:ring-4 focus:ring-offset-2 focus:ring-offset-white/50
+    relative inline-flex items-center justify-center font-black text-black
+    transition-all duration-200 focus:outline-none border-4 border-black
+    disabled:opacity-50 disabled:cursor-not-allowed
     ${fullWidth ? 'w-full' : ''}
-    overflow-hidden
+    overflow-hidden tracking-tight
   `;
   
   const variantStyles = {
     primary: `
-      bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700
-      hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800
-      text-white shadow-xl shadow-blue-500/30
-      focus:ring-blue-300/50
-      before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:to-transparent
-      before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
+      bg-yellow-400 hover:bg-yellow-300
+      shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000]
+      hover:translate-x-[-2px] hover:translate-y-[-2px]
+      active:shadow-[2px_2px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px]
     `,
     secondary: `
-      bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100
-      hover:from-slate-200 hover:via-slate-300 hover:to-slate-200
-      text-slate-700 shadow-lg shadow-slate-500/20
-      focus:ring-slate-300/50
-      border border-slate-200/50 hover:border-slate-300/70
+      bg-pink-400 hover:bg-pink-300
+      shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000]
+      hover:translate-x-[-2px] hover:translate-y-[-2px]
+      active:shadow-[2px_2px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px]
     `,
     danger: `
-      bg-gradient-to-r from-rose-600 via-red-600 to-pink-600
-      hover:from-rose-700 hover:via-red-700 hover:to-pink-700
-      text-white shadow-xl shadow-rose-500/30
-      focus:ring-rose-300/50
-      before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:to-transparent
-      before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
+      bg-red-400 hover:bg-red-300
+      shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000]
+      hover:translate-x-[-2px] hover:translate-y-[-2px]
+      active:shadow-[2px_2px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px]
     `,
     ghost: `
-      bg-transparent hover:bg-slate-100/80 text-slate-700
-      focus:ring-slate-300/50 backdrop-blur-sm
-      hover:shadow-lg hover:shadow-slate-500/10
+      bg-transparent border-2 border-black hover:bg-gray-100
+      shadow-[2px_2px_0px_0px_#000] hover:shadow-[4px_4px_0px_0px_#000]
+      hover:translate-x-[-2px] hover:translate-y-[-2px]
+      active:shadow-none active:translate-x-[2px] active:translate-y-[2px]
     `,
     outline: `
-      border-2 border-slate-300/70 bg-white/80 backdrop-blur-sm
-      hover:bg-slate-50 hover:border-slate-400/80 text-slate-700
-      focus:ring-slate-300/50 shadow-lg shadow-slate-500/10
-      hover:shadow-xl hover:shadow-slate-500/20
+      bg-white hover:bg-gray-50
+      shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000]
+      hover:translate-x-[-2px] hover:translate-y-[-2px]
+      active:shadow-[2px_2px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px]
     `,
-    glass: `
-      bg-white/20 backdrop-blur-xl border border-white/30
-      hover:bg-white/30 text-slate-700 shadow-xl shadow-slate-500/20
-      focus:ring-white/50
-    `,
-    gradient: `
-      bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600
-      hover:from-purple-700 hover:via-pink-700 hover:to-blue-700
-      text-white shadow-xl shadow-purple-500/30
-      focus:ring-purple-300/50 animate-gradient-x
-      before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:to-transparent
-      before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
+    brutal: `
+      bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-300 hover:to-pink-300
+      shadow-[6px_6px_0px_0px_#000] hover:shadow-[8px_8px_0px_0px_#000]
+      hover:translate-x-[-2px] hover:translate-y-[-2px]
+      active:shadow-[3px_3px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px]
+      transform rotate-1 hover:rotate-0
     `
   };
 
   const sizeStyles = {
-    xs: 'px-2.5 py-1.5 text-xs gap-1 min-h-[28px]',
-    sm: 'px-3.5 py-2 text-sm gap-1.5 min-h-[36px]',
-    md: 'px-5 py-2.5 text-sm gap-2 min-h-[44px]',
-    lg: 'px-6 py-3.5 text-base gap-2.5 min-h-[52px]',
-    xl: 'px-8 py-4 text-lg gap-3 min-h-[60px]'
+    xs: 'px-3 py-1.5 text-sm gap-1',
+    sm: 'px-4 py-2 text-sm gap-1.5',
+    md: 'px-6 py-3 text-base gap-2',
+    lg: 'px-8 py-4 text-lg gap-2.5',
+    xl: 'px-10 py-5 text-xl gap-3'
   };
 
   const iconSizes = {
     xs: 'w-3 h-3',
     sm: 'w-4 h-4',
-    md: 'w-4 h-4',
-    lg: 'w-5 h-5',
-    xl: 'w-6 h-6'
-  };
-
-  const roundedStyles = {
-    sm: 'rounded-sm',
-    md: 'rounded-md',
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
-    full: 'rounded-full'
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6',
+    xl: 'w-7 h-7'
   };
 
   return (
@@ -124,51 +102,43 @@ export const Button = ({
         ${baseClasses} 
         ${variantStyles[variant]} 
         ${sizeStyles[size]} 
-        ${roundedStyles[rounded]}
+        rounded-2xl
         ${className}
       `}
     >
-      {/* Subtle inner glow */}
-      <div className="absolute inset-0 rounded-inherit bg-gradient-to-t from-transparent via-white/5 to-white/10 pointer-events-none" />
-      
-      {/* Loading spinner with serene animation */}
+      {/* Loading spinner */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-inherit rounded-inherit">
-          <Loader2 className={`${iconSizes[size]} animate-spin`} />
+        <div className="absolute inset-0 flex items-center justify-center bg-inherit rounded-2xl">
+          <Loader2 className={`${iconSizes[size]} animate-spin text-black`} />
         </div>
       )}
       
-      {/* Content container with fade effect when loading */}
+      {/* Content */}
       <div className={`
         relative z-10 flex items-center justify-center gap-inherit
-        transition-opacity duration-300
+        transition-opacity duration-200
         ${loading ? 'opacity-0' : 'opacity-100'}
       `}>
         {!loading && icon && iconPosition === 'left' && (
-          <span className={`${iconSizes[size]} transition-transform duration-300 group-hover:scale-110`}>
+          <span className={`${iconSizes[size]} font-bold`}>
             {icon}
           </span>
         )}
         
-        <span className="relative z-10 transition-transform duration-300 group-hover:scale-105">
+        <span className="relative z-10 uppercase">
           {children}
         </span>
         
         {!loading && icon && iconPosition === 'right' && (
-          <span className={`${iconSizes[size]} transition-transform duration-300 group-hover:scale-110`}>
+          <span className={`${iconSizes[size]} font-bold`}>
             {icon}
           </span>
         )}
       </div>
 
-      {/* Floating particles effect for primary and gradient variants */}
-      {(variant === 'primary' || variant === 'gradient') && !disabled && (
-        <>
-          <div className="absolute top-1 left-2 w-1 h-1 bg-white/60 rounded-full animate-pulse" />
-          <div className="absolute top-2 right-3 w-0.5 h-0.5 bg-white/40 rounded-full animate-pulse delay-300" />
-          <div className="absolute bottom-2 left-1/3 w-0.5 h-0.5 bg-white/50 rounded-full animate-pulse delay-700" />
-        </>
-      )}
+      {/* Decorative elements */}
+      <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 border-2 border-black rounded-full"></div>
+      <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-pink-300 border-2 border-black rounded-full"></div>
     </button>
   );
 };

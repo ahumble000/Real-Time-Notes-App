@@ -4,31 +4,29 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ProductivityDashboard } from '@/components/features/ProductivityDashboard';
+import { Header } from '@/components/layout/Header';
 
-export default function HomePage() {
-  const { isAuthenticated, loading } = useAuth();
+export default function DashboardPage() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (isAuthenticated) {
-        router.push('/dashboard');
-      } else {
-        router.push('/auth/login');   
-      }
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login');
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, authLoading, router]);
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-yellow-50 to-pink-50">
         <div className="relative">
           {/* Neubrutalism loading card */}
           <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_#000] transform rotate-1">
-            <div className="bg-yellow-300 border-3 border-black rounded-xl p-6 shadow-[4px_4px_0px_0px_#000] -rotate-2 text-center">
+            <div className="bg-yellow-300 border-3 border-black rounded-xl p-6 shadow-[4px_4px_0px_0px_#000] -rotate-2">
               <LoadingSpinner size="lg" variant="gentle" />
               <p className="mt-6 text-xl font-black text-black tracking-tight">
-                Loading...
+                Loading dashboard...
               </p>
             </div>
           </div>
@@ -41,5 +39,18 @@ export default function HomePage() {
     );
   }
 
-  return null;
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-yellow-50 to-pink-50">
+      <Header title="Dashboard" />
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          <ProductivityDashboard />
+        </div>
+      </div>
+    </div>
+  );
 }

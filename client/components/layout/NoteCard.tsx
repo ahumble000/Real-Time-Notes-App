@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { Clock, User, Eye, Lock, MoreVertical, Trash2, Edit3, Users, FileText } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Note } from '@/types';
 
 interface NoteCardProps {
@@ -12,7 +10,6 @@ interface NoteCardProps {
   onDelete?: () => void;
   onEdit?: () => void;
   showAuthor?: boolean;
-  variant?: 'default' | 'glass' | 'minimal';
   currentUserId?: string;
 }
 
@@ -22,7 +19,6 @@ export const NoteCard = ({
   onDelete,
   onEdit,
   showAuthor = false,
-  variant = 'default',
   currentUserId
 }: NoteCardProps) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -50,186 +46,184 @@ export const NoteCard = ({
       const weeks = Math.floor(diffInDays / 7);
       return `${weeks}w ago`;
     } else {
-      return date.toLocaleDateString('en-US', {
+      return new Intl.DateTimeFormat('en-US', {
         month: 'short',
         day: 'numeric',
-        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-      });
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+      }).format(date);
     }
   };
 
-  const getContentStats = (content: string) => {
-    const words = content.trim().split(/\s+/).filter(word => word.length > 0).length;
-    const lines = content.split('\n').length;
-    const chars = content.length;
-    
-    return { words, lines, chars };
+  const truncateContent = (content: string, maxLength: number = 120) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength).trim() + '...';
   };
 
-  const truncateContent = (content: string, maxLength: number = 150) => {
-    // Remove markdown formatting for preview
-    const cleanContent = content
-      .replace(/#{1,6}\s+/g, '') // Remove headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic
-      .replace(/`(.*?)`/g, '$1') // Remove inline code
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links, keep text
-      .replace(/\n+/g, ' ') // Replace newlines with spaces
-      .trim();
-
-    if (cleanContent.length <= maxLength) return cleanContent;
-    return cleanContent.substring(0, maxLength).replace(/\s+\S*$/, '') + '...';
-  };
-
-  const contentStats = getContentStats(note.content);
-  const hasContent = note.content.trim().length > 0;
+  const noteColors = [
+    'bg-yellow-400',
+    'bg-pink-400',
+    'bg-blue-400',
+    'bg-green-400',
+    'bg-purple-400',
+    'bg-orange-400'
+  ];
+  
+  // Use note ID to consistently assign colors
+  const colorIndex = note._id.length % noteColors.length;
+  const noteColor = noteColors[colorIndex];
 
   return (
-    <div onClick={onClick}>
-      <Card 
-        variant={variant}
-        className="group cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-slate-500/10 hover:-translate-y-1"
+    <div className="relative group">
+      <div
+        onClick={onClick}
+        className={`
+          ${noteColor} border-4 border-black rounded-2xl p-6 
+          shadow-[4px_4px_0px_0px_#000] hover:shadow-[6px_6px_0px_0px_#000]
+          hover:translate-x-[-2px] hover:translate-y-[-2px]
+          cursor-pointer transition-all duration-200 transform
+          hover:rotate-1 group-hover:scale-[1.02]
+          relative overflow-hidden
+        `}
       >
-      <div className="p-6">
-        
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            {note.isPublic ? (
-              <Badge variant="success" size="sm" icon={<Eye className="w-3 h-3" />}>
-                Public
-              </Badge>
-            ) : (
-              <Badge variant="secondary" size="sm" icon={<Lock className="w-3 h-3" />}>
-                Private
-              </Badge>
-            )}
-            
-            {/* Collaborators Badge */}
-            {note.collaborators && note.collaborators.length > 0 && (
-              <Badge variant="info" size="sm" icon={<Users className="w-3 h-3" />}>
-                {note.collaborators.length} collaborator{note.collaborators.length !== 1 ? 's' : ''}
-              </Badge>
-            )}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-black text-black truncate tracking-tight">
+              {note.title}
+            </h3>
+            <div className="flex items-center gap-2 mt-2">
+              {/* Visibility Badge */}
+              <div className={`
+                flex items-center gap-1 px-2 py-1 rounded-lg border-2 border-black
+                ${note.isPublic ? 'bg-green-300' : 'bg-red-300'}
+                shadow-[2px_2px_0px_0px_#000]
+              `}>
+                {note.isPublic ? (
+                  <Eye className="w-3 h-3 text-black" />
+                ) : (
+                  <Lock className="w-3 h-3 text-black" />
+                )}
+                <span className="text-xs font-bold text-black">
+                  {note.isPublic ? 'Public' : 'Private'}
+                </span>
+              </div>
 
-            {/* Version Badge */}
-            {note.version > 1 && (
-              <Badge variant="default" size="sm">
-                v{note.version}
-              </Badge>
-            )}
+              {/* Collaborators Badge */}
+              {note.collaborators && note.collaborators.length > 0 && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg border-2 border-black bg-blue-300 shadow-[2px_2px_0px_0px_#000]">
+                  <Users className="w-3 h-3 text-black" />
+                  <span className="text-xs font-bold text-black">
+                    +{note.collaborators.length}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-          
-          <div className="relative">
-            {(onEdit || canDelete) && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(!showMenu);
-                }}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100/80 transition-all duration-200 opacity-0 group-hover:opacity-100"
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-            )}
 
-            {showMenu && (onEdit || canDelete) && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200/50 py-2 z-10">
-                {onEdit && (
+          {/* Actions Menu */}
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              className="p-2 border-2 border-black rounded-lg bg-white hover:bg-gray-100 shadow-[2px_2px_0px_0px_#000] hover:shadow-[3px_3px_0px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all duration-200"
+            >
+              <MoreVertical className="w-4 h-4 text-black" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {showMenu && (
+              <div className="absolute right-0 top-full mt-2 w-52 bg-white border-3 border-black rounded-xl shadow-[4px_4px_0px_0px_#000] z-20">
+                <div className="py-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onEdit();
+                      onClick?.();
                       setShowMenu(false);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2"
+                    className="w-full px-4 py-2 text-left font-bold text-black hover:bg-green-200 flex items-center gap-2 transition-colors border-b-2 border-black"
                   >
-                    <Edit3 className="w-4 h-4" />
-                    <span>Edit</span>
+                    <Eye className="w-4 h-4" />
+                    View Note
                   </button>
-                )}
-                {canDelete && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete</span>
-                  </button>
-                )}
+                  {onEdit && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit();
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left font-bold text-black hover:bg-blue-200 flex items-center gap-2 transition-colors border-b-2 border-black"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      Edit Note
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete();
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left font-bold text-red-700 hover:bg-red-200 flex items-center gap-2 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete Note
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
         </div>
-
-        {/* Title */}
-        <h3 className="text-lg font-semibold text-slate-800 mb-3 line-clamp-2 group-hover:text-blue-700 transition-colors duration-200">
-          {note.title}
-        </h3>
 
         {/* Content Preview */}
-        {hasContent ? (
-          <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-3">
-            {truncateContent(note.content)}
+        <div className="mb-4">
+          <p className="text-sm font-bold text-gray-800 leading-relaxed">
+            {truncateContent(note.content || 'No content')}
           </p>
-        ) : (
-          <p className="text-slate-400 text-sm italic mb-4">
-            No content yet...
-          </p>
-        )}
-
-        {/* Content Stats */}
-        {hasContent && (
-          <div className="flex items-center space-x-4 mb-4 text-xs text-slate-500">
-            <div className="flex items-center space-x-1">
-              <FileText className="w-3 h-3" />
-              <span>{contentStats.words} word{contentStats.words !== 1 ? 's' : ''}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span>{contentStats.chars} char{contentStats.chars !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-        )}
+        </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-slate-500">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between pt-4 border-t-3 border-black">
+          <div className="flex items-center gap-3">
             {showAuthor && (
-              <div className="flex items-center space-x-1">
-                <User className="w-3 h-3" />
-                <span className="font-medium">{note.author.username}</span>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-400 border-2 border-black rounded-full flex items-center justify-center">
+                  <User className="w-3 h-3 text-black" />
+                </div>
+                <span className="text-xs font-bold text-black">
+                  {note.author.username}
+                </span>
               </div>
             )}
             
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-1 text-xs font-bold text-gray-700">
               <Clock className="w-3 h-3" />
-              <span>Updated {formatDate(note.updatedAt)}</span>
+              {formatDate(note.updatedAt)}
             </div>
           </div>
 
-          {/* Last edited by info */}
-          {note.lastEditedBy && note.lastEditedBy._id !== note.author._id && (
-            <div className="flex items-center space-x-1 text-xs text-slate-400">
-              <span>by {note.lastEditedBy.username}</span>
-            </div>
-          )}
+          {/* Note Type Icon */}
+          <div className="p-1 border-2 border-black rounded-lg bg-white shadow-[2px_2px_0px_0px_#000]">
+            <FileText className="w-4 h-4 text-black" />
+          </div>
         </div>
 
-        {/* Created date if different from updated */}
-        {new Date(note.createdAt).toDateString() !== new Date(note.updatedAt).toDateString() && (
-          <div className="mt-2 text-xs text-slate-400">
-            Created {formatDate(note.createdAt)}
-          </div>
-        )}
-
-        {/* Hover effect overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-blue-500/0 opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300 pointer-events-none" />
+        {/* Decorative elements */}
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-white border-2 border-black rounded-full"></div>
+        <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-black rounded-full"></div>
       </div>
-      </Card>
+
+      {/* Click outside to close menu */}
+      {showMenu && (
+        <div
+          className="fixed inset-0 z-10"
+          onClick={() => setShowMenu(false)}
+        />
+      )}
     </div>
   );
 };
