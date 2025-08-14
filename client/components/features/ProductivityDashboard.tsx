@@ -193,7 +193,7 @@ export const ProductivityDashboard = () => {
               📊 PRODUCTIVITY DASHBOARD
             </h1>
             <p className="text-lg font-bold text-gray-700">
-              Track your brutal progress and insights
+              Track your progress and insights
             </p>
           </div>
           

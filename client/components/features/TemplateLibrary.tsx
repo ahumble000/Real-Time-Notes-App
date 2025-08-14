@@ -433,7 +433,7 @@ export default function TemplateLibrary() {
                 📚 TEMPLATE LIBRARY
               </h1>
               <p className="text-lg font-bold text-gray-700">
-                Brutal templates to speed up your note creation
+                Templates to speed up your note creation
               </p>
             </div>
             

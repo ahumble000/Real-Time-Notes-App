@@ -437,7 +437,7 @@ export const WorkspaceSettings = ({ workspaceId }: WorkspaceSettingsProps) => {
             ⚙️ {workspace.name} SETTINGS
           </h1>
           <p className="text-lg font-bold text-gray-700">
-            Manage your brutal workspace settings and members
+            Manage your workspace settings and members
           </p>
         </div>
 

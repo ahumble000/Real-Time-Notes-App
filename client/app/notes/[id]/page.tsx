@@ -599,7 +599,7 @@ export default function NoteEditorPage() {
                     remarkPlugins={[remarkGfm]}
                     className="markdown-preview text-black font-medium leading-relaxed"
                   >
-                    {content || '*🚀 No content yet. Switch to edit mode to start writing your brutal note!*'}
+                    {content || '*🚀 No content yet. Switch to edit mode to start writing your note!*'}
                   </ReactMarkdown>
                 </div>
               </div>
@@ -622,7 +622,7 @@ export default function NoteEditorPage() {
                 ref={textareaRef}
                 value={content}
                 onChange={(e) => canEdit && setContent(e.target.value)}
-                placeholder={canEdit ? "🚀 Start writing your brutal note... Make it EPIC!" : "❌ You don't have permission to edit this note."}
+                placeholder={canEdit ? "🚀 Start writing your note... Make it EPIC!" : "❌ You don't have permission to edit this note."}
                 disabled={!canEdit}
                 className="
                   w-full resize-none border-none outline-none bg-gradient-to-br from-yellow-50 to-orange-50
@@ -728,7 +728,7 @@ function NoteSettingsModal({ isOpen, onClose, note, onSubmit }: NoteSettingsModa
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter your brutal note title..."
+              placeholder="Enter your note title..."
               required
               disabled={loading}
               className="

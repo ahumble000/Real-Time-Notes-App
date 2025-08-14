@@ -617,7 +617,7 @@ export const UserSettings = () => {
                 ⚙️ USER SETTINGS
               </h1>
               <p className="text-lg font-bold text-gray-700">
-                Manage your account and brutal preferences
+                Manage your account and preferences
               </p>
             </div>
             

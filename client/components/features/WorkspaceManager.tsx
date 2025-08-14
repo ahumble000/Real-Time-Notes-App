@@ -137,14 +137,14 @@ export const WorkspaceManager = () => {
       <Modal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="🚀 CREATE BRUTAL WORKSPACE"
+        title="🚀 CREATE YOUR WORKSPACE"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           <InputField
             label="Workspace Name"
             value={formData.name}
             onChange={(value) => setFormData({ ...formData, name: value })}
-            placeholder="Enter your brutal workspace name"
+            placeholder="Enter your workspace name"
             required
           />
 
@@ -155,7 +155,7 @@ export const WorkspaceManager = () => {
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Describe your brutal workspace..."
+              placeholder="Describe your workspace..."
               rows={3}
               className="w-full px-4 py-3 border-4 border-black rounded-xl font-bold text-black bg-white focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200 resize-none"
             />
@@ -246,7 +246,7 @@ export const WorkspaceManager = () => {
                 🏢 WORKSPACES
               </h1>
               <p className="text-lg font-bold text-gray-700">
-                Brutal collaboration spaces for your team
+                Collaboration spaces for your team
               </p>
             </div>
             
@@ -266,7 +266,7 @@ export const WorkspaceManager = () => {
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-black" />
             <input
               type="text"
-              placeholder="Search brutal workspaces..."
+              placeholder="Search workspaces..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border-4 border-black rounded-xl font-bold text-black bg-white focus:outline-none focus:shadow-[4px_4px_0px_0px_#000] focus:translate-x-[-2px] focus:translate-y-[-2px] transition-all duration-200"
@@ -388,7 +388,7 @@ export const WorkspaceManager = () => {
             <p className="text-lg font-bold text-gray-600 mb-6">
               {searchTerm 
                 ? 'Try adjusting your search terms' 
-                : 'Create your first brutal workspace!'
+                : 'Create your first workspace!'
               }
             </p>
             {!searchTerm && (

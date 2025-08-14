@@ -238,7 +238,7 @@ export const AnalyticsDashboard = () => {
                 📊 ANALYTICS DASHBOARD
               </h1>
               <p className="text-lg font-bold text-gray-700">
-                Track your brutal productivity and insights
+                Track your productivity and insights
               </p>
             </div>
             
@@ -272,7 +272,7 @@ export const AnalyticsDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-black text-black mb-2">🎯 PRODUCTIVITY SCORE</h2>
-              <p className="text-lg font-bold text-black">Your brutal productivity rating</p>
+              <p className="text-lg font-bold text-black">Your productivity rating</p>
             </div>
             <div className="text-6xl font-black text-black">
               {productivityScore}/100

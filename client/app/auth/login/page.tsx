@@ -50,7 +50,7 @@ export default function LoginPage() {
             Welcome Back
           </h2>
           <p className="text-lg font-bold text-gray-700">
-            Sign in to access your brutal notes
+            Sign in to access your notes
           </p>
         </div>
 

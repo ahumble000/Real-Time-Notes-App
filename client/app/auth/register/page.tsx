@@ -60,7 +60,7 @@ export default function RegisterPage() {
               Join Us Today
             </h2>
             <p className="text-lg font-bold text-gray-700">
-              Create your account and start collaborating with brutal style
+              Create your account and start collaborating with style
             </p>
           </div>          {/* Registration Form */}
           <div className="bg-white border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_#000] transform -rotate-1 relative">
