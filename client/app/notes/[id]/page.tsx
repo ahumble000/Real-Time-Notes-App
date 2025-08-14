@@ -197,9 +197,13 @@ export default function NoteEditorPage() {
       // Send update via socket for real-time sync
       socketService.updateNote(noteId, content);
       
+      // Also save to database
+      await api.put(`/notes/${noteId}`, { content });
+      
       lastSavedContentRef.current = content;
     } catch (error) {
       console.error('Auto-save failed:', error);
+      // Don't show error toast for auto-save failures to avoid spamming
     } finally {
       setSaving(false);
     }
@@ -237,8 +241,20 @@ export default function NoteEditorPage() {
   }, [content]);
 
   const handleUsersInNote = useCallback((users: ConnectedUser[]) => {
+    const prevUserCount = connectedUsers.length;
     setConnectedUsers(users);
-  }, []);
+    
+    // Show notification when someone joins/leaves a public note
+    if (note?.isPublic && prevUserCount > 0 && users.length > prevUserCount) {
+      const newUser = users.find(u => !connectedUsers.some(cu => cu.id === u.id));
+      if (newUser && newUser.id !== user?.id) {
+        toast.success(`${newUser.username} joined the note!`, {
+          duration: 2000,
+          position: 'bottom-right'
+        });
+      }
+    }
+  }, [connectedUsers, note?.isPublic, user?.id]);
 
   const handleUserTyping = useCallback((data: TypingUser) => {
     setTypingUsers(prev => {
@@ -606,14 +622,45 @@ export default function NoteEditorPage() {
             </div>
           ) : (
             <div className="relative h-full">
-              {/* Public Note Editor Warning - Brutal Style */}
-              {note.isPublic && user?.id !== note.author._id && (
-                <div className="absolute top-6 left-6 right-6 bg-blue-300 border-3 border-black p-4 z-10 shadow-[4px_4px_0px_0px_#000] transform -rotate-1">
-                  <div className="flex items-center space-x-3">
-                    <Globe className="h-6 w-6 text-black" />
-                    <span className="text-sm font-black text-black">
-                      🌍 <strong>PUBLIC NOTE:</strong> You can edit this note. Changes will be visible to EVERYONE!
-                    </span>
+              {/* Public Note Editor Info - Enhanced */}
+              {note.isPublic && (
+                <div className="absolute top-6 left-6 right-6 z-10">
+                  <div className="bg-gradient-to-r from-green-300 to-blue-300 border-3 border-black p-4 shadow-[4px_4px_0px_0px_#000] transform -rotate-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Globe className="h-6 w-6 text-black" />
+                        <div>
+                          <span className="text-sm font-black text-black block">
+                            🌍 <strong>PUBLIC NOTE</strong> - Anyone can edit this note!
+                          </span>
+                          {user?.id !== note.author._id && (
+                            <span className="text-xs font-bold text-gray-700">
+                              Changes are saved automatically and visible to everyone in real-time
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {connectedUsers.length > 1 && (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs font-bold text-black">
+                            {connectedUsers.length - 1} other{connectedUsers.length === 2 ? '' : 's'} editing
+                          </span>
+                          <div className="flex -space-x-1">
+                            {connectedUsers.slice(0, 3).map((connectedUser, index) => (
+                              connectedUser.id !== user?.id && (
+                                <div
+                                  key={connectedUser.id}
+                                  className="inline-flex items-center justify-center h-6 w-6 bg-white border-2 border-black text-black text-xs font-black shadow-[1px_1px_0px_0px_#000] rounded-full"
+                                  title={`${connectedUser.username} is editing`}
+                                >
+                                  {connectedUser.username.charAt(0).toUpperCase()}
+                                </div>
+                              )
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -622,7 +669,13 @@ export default function NoteEditorPage() {
                 ref={textareaRef}
                 value={content}
                 onChange={(e) => canEdit && setContent(e.target.value)}
-                placeholder={canEdit ? "🚀 Start writing your note... Make it EPIC!" : "❌ You don't have permission to edit this note."}
+                placeholder={
+                  canEdit 
+                    ? note.isPublic && user?.id !== note.author._id
+                      ? "🌍 This is a public note - you can edit it! Your changes will be visible to everyone."
+                      : "🚀 Start writing your note... Make it EPIC!"
+                    : "🔒 This note is private and you don't have permission to edit it."
+                }
                 disabled={!canEdit}
                 className="
                   w-full resize-none border-none outline-none bg-gradient-to-br from-yellow-50 to-orange-50
@@ -632,30 +685,40 @@ export default function NoteEditorPage() {
                 "
                 style={{ 
                   minHeight: '600px',
-                  paddingTop: note.isPublic && user?.id !== note.author._id ? '100px' : '32px'
+                  paddingTop: note.isPublic ? '120px' : '32px'
                 }}
               />
               
-              {/* Typing Indicators - Brutal Style */}
+              {/* Enhanced Typing Indicators - Brutal Style */}
               {typingUsers.length > 0 && (
                 <div className="absolute bottom-6 left-6 flex items-center space-x-3 bg-white border-3 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000] transform -rotate-2">
                   <div className="flex space-x-1">
-                    <div className="w-3 h-3 bg-primary-500 border border-black animate-bounce"></div>
-                    <div className="w-3 h-3 bg-primary-500 border border-black animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-3 h-3 bg-primary-500 border border-black animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-3 h-3 bg-blue-500 border border-black animate-bounce rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-500 border border-black animate-bounce rounded-full" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-3 h-3 bg-purple-500 border border-black animate-bounce rounded-full" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                   <span className="text-sm font-black text-black">
                     💬 {typingUsers.map(user => user.username).join(', ')} 
-                    {typingUsers.length === 1 ? ' IS' : ' ARE'} TYPING...
+                    {typingUsers.length === 1 ? ' is' : ' are'} typing...
                   </span>
                 </div>
               )}
 
-              {/* Auto-save indicator - Brutal Style */}
+              {/* Real-time Connection Status */}
+              {note.isPublic && (
+                <div className="absolute bottom-6 right-6 flex items-center space-x-2 bg-white border-2 border-black px-3 py-1 shadow-[2px_2px_0px_0px_#000] transform rotate-1">
+                  <div className="w-2 h-2 bg-green-500 border border-black rounded-full animate-pulse"></div>
+                  <span className="text-xs font-bold text-black">Live</span>
+                </div>
+              )}
+
+              {/* Enhanced Auto-save indicator */}
               {saving && (
                 <div className="absolute top-6 right-6 flex items-center space-x-3 bg-green-300 border-3 border-black px-4 py-2 shadow-[4px_4px_0px_0px_#000] transform rotate-2">
                   <Loader2 className="h-4 w-4 animate-spin text-black" />
-                  <span className="text-sm font-black text-black">💾 SAVING...</span>
+                  <span className="text-sm font-black text-black">
+                    💾 {note.isPublic ? 'Syncing live...' : 'Saving...'}
+                  </span>
                 </div>
               )}
             </div>
